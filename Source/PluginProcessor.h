@@ -25,8 +25,6 @@ struct ChainSettings
     Slope lowCutSlope{ Slope::Slope_12}, highCutSlope{ Slope::Slope_12 };
 };
 
-
-
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
 
 
@@ -74,7 +72,13 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     static juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::createParameterLayout();
-    juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
+    juce::AudioProcessorValueTreeState apvts{ *this, 
+                                               nullptr, 
+                                               "Parameters", 
+                                               createParameterLayout() };
+
+    
+
 
 private:
     using Filter = juce::dsp::IIR::Filter<float>;
@@ -82,6 +86,8 @@ private:
     using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
 
     using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
+
+    using Coefficients = Filter::CoefficientsPtr;
 
     MonoChain rightChain, leftChain;
 
@@ -91,6 +97,10 @@ private:
         Peak,
         HighCut
     };
+
+    void updatePeakFilter(ChainSettings& chainSettings);
+
+    void updateCoefficients(Coefficients& coeffToUpdate, Coefficients& replacements);
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEQAudioProcessor)
